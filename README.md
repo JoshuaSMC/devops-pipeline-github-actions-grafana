@@ -1,6 +1,13 @@
 # 🚀 devops-pipeline-github-actions-grafana
 
-Pipeline CI/CD completo con **GitHub Actions** que despliega automáticamente en **AWS ECS**, más stack de monitoreo con **Prometheus + Grafana**.
+![Deploy](https://github.com/JoshuaSMC/devops-pipeline-github-actions-grafana/actions/workflows/deploy-render.yml/badge.svg)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?logo=githubactions)
+![Prometheus](https://img.shields.io/badge/Prometheus-monitoring-E6522C?logo=prometheus)
+![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?logo=grafana)
+![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render)
+![AWS](https://img.shields.io/badge/AWS-ECS%20Fargate-FF9900?logo=amazonaws)
+
+Pipeline CI/CD completo con **GitHub Actions** que despliega automáticamente en **AWS ECS** y **Render**, más stack de monitoreo con **Prometheus + Grafana**.
 
 > **Repo 3 de 3 — Portfolio DevOps/Cloud**
 > Este es el repo estrella de la trilogía. La app que se despliega está en [`tasks-api-spring-boot-docker`](https://github.com/JoshuaSMC/tasks-api-spring-boot-docker). La infraestructura donde corre se provisiona desde [`infrastructure-as-code-terraform-aws`](https://github.com/JoshuaSMC/infrastructure-as-code-terraform-aws).
