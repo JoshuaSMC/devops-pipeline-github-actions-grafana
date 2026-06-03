@@ -13,6 +13,7 @@ Pipeline CI/CD completo con **GitHub Actions** que despliega automáticamente en
 > Este es el repo estrella de la trilogía. La app que se despliega está en [`tasks-api-spring-boot-docker`](https://github.com/JoshuaSMC/tasks-api-spring-boot-docker). La infraestructura donde corre se provisiona desde [`infrastructure-as-code-terraform-aws`](https://github.com/JoshuaSMC/infrastructure-as-code-terraform-aws).
 
 > 🟢 **Live:** https://tasks-api-f4b9.onrender.com/api/tasks
+> 📄 **Swagger UI:** https://tasks-api-f4b9.onrender.com/swagger-ui.html
 
 ---
 
@@ -81,6 +82,7 @@ Pipeline CI/CD completo con **GitHub Actions** que despliega automáticamente en
 ├── .github/
 │   └── workflows/
 │       ├── ci-cd.yml              # Pipeline principal: build → push ECR → deploy ECS
+│       ├── deploy-render.yml      # Deploy a Render (free tier, URL pública live)
 │       └── reusable-deploy.yml    # Workflow reutilizable para deploy desde otros repos
 ├── monitoring/
 │   ├── prometheus.yml             # Config Prometheus: scrape tasks-api cada 15s
@@ -119,6 +121,8 @@ Job 2: deploy (environment: production)
     └── Smoke test: curl /actuator/health con retry
 ```
 
+![GitHub Actions pipeline](assets/pipeline-cicd.png)
+
 ### Secrets requeridos
 
 | Secret | Descripción |
@@ -147,23 +151,6 @@ jobs:
 ---
 
 ## 📊 Monitoreo local
-
-### Prerrequisito: habilitar métricas Prometheus en tasks-api
-
-Agregar al `pom.xml` de [`tasks-api-spring-boot-docker`](https://github.com/JoshuaSMC/tasks-api-spring-boot-docker):
-
-```xml
-<dependency>
-  <groupId>io.micrometer</groupId>
-  <artifactId>micrometer-registry-prometheus</artifactId>
-</dependency>
-```
-
-Y en `application.properties`:
-
-```properties
-management.endpoints.web.exposure.include=health,info,metrics,prometheus
-```
 
 ### Levantar el stack
 
@@ -194,6 +181,8 @@ El dashboard `tasks-api.json` muestra:
 | Uptime | Tiempo en línea de la instancia |
 | Total requests | Requests en los últimos 30 minutos |
 | CPU usage | % de CPU del proceso (gauge con thresholds) |
+
+![Grafana dashboard con métricas reales](assets/grafana-dashboard.png)
 
 ---
 
