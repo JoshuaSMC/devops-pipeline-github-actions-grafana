@@ -1,0 +1,133 @@
+{
+  "title": "tasks-api — Overview",
+  "uid": "tasks-api-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Requests / second",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job='tasks-api'}[1m])) by (uri, method, status)",
+          "legendFormat": "{{method}} {{uri}} — {{status}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Latencia p95 (ms)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job='tasks-api'}[1m])) by (le, uri, method, status)) * 1000",
+          "legendFormat": "p95 — {{method}} {{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Tasa de errores (4xx + 5xx)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job='tasks-api', status=~'4..|5..'}[1m]))",
+          "legendFormat": "errores/s"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "JVM Heap usado (MB)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{job='tasks-api', area='heap'} / 1024 / 1024",
+          "legendFormat": "heap usado (MB)"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{job='tasks-api', area='heap'} / 1024 / 1024",
+          "legendFormat": "heap máximo (MB)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "MB" }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Threads activos",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 16, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{job='tasks-api'}",
+          "legendFormat": "threads"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Uptime (horas)",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 16, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "process_uptime_seconds{job='tasks-api'} / 3600",
+          "legendFormat": "uptime"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "h", "decimals": 1 }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Total requests (últimos 30m)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 16, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(increase(http_server_requests_seconds_count{job='tasks-api'}[30m]))",
+          "legendFormat": "requests"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "CPU usage",
+      "type": "gauge",
+      "gridPos": { "x": 18, "y": 16, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage{job='tasks-api'} * 100",
+          "legendFormat": "CPU %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 70, "color": "yellow" },
+              { "value": 90, "color": "red" }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

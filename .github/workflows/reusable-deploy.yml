@@ -1,0 +1,85 @@
+name: Reusable — Deploy imagen a ECS
+
+# Workflow reutilizable que puede ser llamado desde otros repos o workflows.
+# Recibe la imagen ya construida y la despliega en ECS.
+#
+# Uso:
+#   jobs:
+#     deploy:
+#       uses: JoshuaSMC/devops-pipeline-github-actions-grafana/.github/workflows/reusable-deploy.yml@main
+#       with:
+#         image: "123456789.dkr.ecr.us-east-1.amazonaws.com/tasks-api-prod:latest"
+#         aws_region: "us-east-1"
+#         ecs_cluster: "tasks-api-prod-cluster"
+#         ecs_service: "tasks-api-prod-service"
+#         container_name: "tasks-api"
+#       secrets:
+#         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'URI completa de la imagen Docker a desplegar'
+        type: string
+        required: true
+      aws_region:
+        description: 'AWS region'
+        type: string
+        required: false
+        default: 'us-east-1'
+      ecs_cluster:
+        description: 'Nombre del ECS cluster'
+        type: string
+        required: true
+      ecs_service:
+        description: 'Nombre del ECS service'
+        type: string
+        required: true
+      container_name:
+        description: 'Nombre del container en la task definition'
+        type: string
+        required: true
+    secrets:
+      aws_access_key_id:
+        required: true
+      aws_secret_access_key:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy a ECS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.aws_access_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+          aws-region:            ${{ inputs.aws_region }}
+
+      - name: Descargar task definition actual
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ inputs.container_name }} \
+            --query taskDefinition \
+            > task-definition.json
+
+      - name: Actualizar imagen en task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name:  ${{ inputs.container_name }}
+          image:           ${{ inputs.image }}
+
+      - name: Desplegar en ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition:            ${{ steps.task-def.outputs.task-definition }}
+          service:                    ${{ inputs.ecs_service }}
+          cluster:                    ${{ inputs.ecs_cluster }}
+          wait-for-service-stability: true

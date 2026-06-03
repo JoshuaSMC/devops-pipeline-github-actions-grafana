@@ -1,0 +1,38 @@
+name: Deploy — Render (free tier)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo del deploy manual'
+        required: false
+        default: 'deploy manual'
+
+jobs:
+  deploy:
+    name: Deploy a Render
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Disparar deploy en Render
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "Deploy disparado en Render"
+
+      - name: Esperar y verificar
+        run: |
+          echo "Esperando que Render levante la nueva versión..."
+          HEALTHY=false
+          for i in {1..18}; do
+            if curl -sf https://tasks-api-f4b9.onrender.com/actuator/health | grep -q '"status":"UP"'; then
+              echo "Deploy exitoso — https://tasks-api-f4b9.onrender.com"
+              HEALTHY=true
+              break
+            fi
+            echo "Intento $i/18 — reintentando en 10s..."
+            sleep 10
+          done
+          if [ "$HEALTHY" = "false" ]; then
+            echo "Render no respondió después de 3 minutos"
+            exit 1
+          fi

@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+*.iml
+
+# Grafana local data
+grafana-data/
+
+# Generado por el workflow de CI/CD — no commitear
+task-definition.json
